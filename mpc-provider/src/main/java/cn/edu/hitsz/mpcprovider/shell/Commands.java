@@ -10,4 +10,8 @@ import org.springframework.shell.standard.ShellMethod;
 @ShellComponent
 public class Commands {
 
+    @ShellMethod(value = "Echo input.", key = {"echo", "ec"})
+    public void echo(String input) {
+        System.out.println(input);
+    }
 }
