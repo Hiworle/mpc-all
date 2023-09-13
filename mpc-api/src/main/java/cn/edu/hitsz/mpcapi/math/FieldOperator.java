@@ -3,21 +3,12 @@ package cn.edu.hitsz.mpcapi.math;
 import java.math.BigInteger;
 
 /**
+ * @param k     有限域的大小
+ * @param alpha 本源根
  * @author hope
  * @date 2023/9/9 - 9:50
  */
-public final class FieldOperator {
-
-    /*有限域的大小*/
-    private final BigInteger n;
-
-    /*本源根*/
-    private final BigInteger a;
-
-    public FieldOperator(BigInteger n, BigInteger a) {
-        this.a = a;
-        this.n = n;
-    }
+public record FieldOperator(BigInteger k, BigInteger alpha) {
 
     /**
      * 有限域内的加法
@@ -25,8 +16,7 @@ public final class FieldOperator {
      * @throws ArithmeticException 抛出的运算错误，例如传入数据不在有限域内
      */
     public BigInteger add(BigInteger a, BigInteger b) throws ArithmeticException {
-        // todo
-        return null;
+        return a.add(b).mod(k);
     }
 
     /**
@@ -35,8 +25,7 @@ public final class FieldOperator {
      * @throws ArithmeticException 抛出的运算错误
      */
     public BigInteger sub(BigInteger a, BigInteger b) throws ArithmeticException {
-        // todo
-        return null;
+        return a.subtract(b).mod(k);
     }
 
     /**
@@ -45,8 +34,7 @@ public final class FieldOperator {
      * @throws ArithmeticException 抛出的运算错误
      */
     public BigInteger mul(BigInteger a, BigInteger b) throws ArithmeticException {
-        // todo
-        return null;
+        return a.multiply(b).mod(k);
     }
 
     /**
@@ -55,10 +43,8 @@ public final class FieldOperator {
      * @throws ArithmeticException 抛出的运算错误
      */
     public BigInteger div(BigInteger a, BigInteger b) throws ArithmeticException {
-        // todo
-        return null;
+        return mul(a, inv(b));
     }
-
 
     /**
      * 求逆元
@@ -66,23 +52,16 @@ public final class FieldOperator {
      * @throws ArithmeticException 抛出的运算错误
      */
     public BigInteger inv(BigInteger a) throws ArithmeticException {
-        // todo
-        return null;
+        return a.modInverse(k);
     }
 
     /**
-     * 是否在有限域内
+     * 求幂次
+     *
+     * @throws ArithmeticException 抛出的运算错误
      */
-    public boolean check(BigInteger a) {
-        // todo
-        return false;
+    public BigInteger exp(BigInteger a, BigInteger b) throws ArithmeticException {
+        return a.modPow(b, k);
     }
 
-    /**
-     * 是否都在有限域内
-     */
-    public boolean check(BigInteger[][] matrix) {
-        // todo
-        return false;
-    }
 }

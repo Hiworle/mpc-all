@@ -5,7 +5,7 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
-import java.util.ArrayList;
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -24,9 +24,13 @@ public class CalculatorConfig implements EnvironmentAware {
         String total = environment.getProperty(prefix + "total");
         String[] calculators = environment.getProperty(prefix + "calculators").split(",");
         String[] providers = environment.getProperty(prefix + "providers").split(",");
+        String alpha = environment.getProperty(prefix + "field.alpha");
+        String k = environment.getProperty(prefix + "field.k");
         CalculatorContext.id = Integer.valueOf(id);
         CalculatorContext.total = Integer.valueOf(total);
         CalculatorContext.calculators = List.of(calculators);
         CalculatorContext.providers = List.of(providers);
+        CalculatorContext.alpha = new BigInteger(alpha);
+        CalculatorContext.k = new BigInteger(k);
     }
 }

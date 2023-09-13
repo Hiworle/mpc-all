@@ -3,8 +3,6 @@ package cn.edu.hitsz.mpccalculator.controller;
 import cn.edu.hitsz.mpcapi.data.Data;
 import cn.edu.hitsz.mpccalculator.CalculatorContext;
 import cn.edu.hitsz.mpccalculator.work.Worker;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,16 +14,42 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class CalculatorController {
     private Thread t;
+    private Worker worker;
+
     @RequestMapping("/")
     public Data cal(@RequestBody Data data) {
-        // todo 存放到相应的队列中，如果是第一次启动，创建计算线程
-        CalculatorContext.queue.add(data.getContent());
+        // 存放到相应的队列中，如果是第一次启动，创建计算线程
         if (t == null) {
-            Worker worker = new Worker();
+            worker = new Worker();
             t = new Thread(worker);
             t.start();
         }
-        System.out.println(data);
+
+        try {
+            switch (data.getType()) {
+                case INPUT -> {
+                    CalculatorContext.inputQueue.put(data.getContent());
+                }
+                case SWAP -> {
+                    CalculatorContext.swapQueue.put(data.getContent());
+                }
+                case RESULT -> {
+
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("RECEIVED: " + data);
         return data;
+    }
+
+    @RequestMapping("/result")
+    public String result() {
+        if (worker.getResult() == null) {
+            return "NULL";
+        }
+        return worker.getResult().toString();
     }
 }
