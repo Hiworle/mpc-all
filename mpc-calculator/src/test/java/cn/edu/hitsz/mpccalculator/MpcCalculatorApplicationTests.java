@@ -61,4 +61,26 @@ class MpcCalculatorApplicationTests {
         System.out.println("b = " + Arrays.deepToString(b));
         System.out.println("matrixMul = " + Arrays.deepToString(matrixMul));
     }
+
+    @Test
+    void test() {
+        BigInteger k = new BigInteger("206158430209");
+        BigInteger alpha = BigInteger.valueOf(22);
+        FieldOperator op = new FieldOperator(k, alpha);
+        MatrixOperator matrixOperator = new MatrixOperator();
+
+        BigInteger p1 = new BigInteger("206157838086");
+        BigInteger p3 = new BigInteger("205812493086");
+        BigInteger p2 = new BigInteger("206142823086");
+
+        BigInteger x = op.sub(BigInteger.ONE, op.exp(alpha, BigInteger.TWO));
+        BigInteger y = op.sub(p3, op.mul(op.exp(alpha, BigInteger.TWO), p1));
+        BigInteger div = op.div(y, x);
+        System.out.println("x = " + x);
+        System.out.println("y = " + y);
+        System.out.println("div = " + div);
+
+        BigInteger div2 = op.div(op.sub(p3, p1), op.sub(alpha, op.exp(alpha, BigInteger.valueOf(3))));
+        System.out.println("div2 = " + div2);
+    }
 }

@@ -18,7 +18,7 @@ import static cn.edu.hitsz.mpccalculator.CalculatorContext.*;
  */
 public class Worker implements Runnable {
 
-    private int counter = id - 1;
+    private int counter = id;
     private BigInteger d = null;
     private BigInteger result = null;
     private final FieldOperator fieldOperator = new FieldOperator(k, alpha);
@@ -27,7 +27,7 @@ public class Worker implements Runnable {
     public void run() {
         while (true) {
             try {
-                // 计算[d]_i = [a]_i * [b]_i, i是counter + 1
+                // 计算[d]_i = [a]_i * [b]_i, i是 counter
                 if (!inputQueue.isEmpty()) {
                     BigInteger a = inputQueue.take();
                     BigInteger b = inputQueue.take();
@@ -35,7 +35,7 @@ public class Worker implements Runnable {
                     List<String> ips = new ArrayList<>();
                     if (id == 0) { // 若为P1，发送给P3-Pn
                         ips.addAll(calculators.subList(2, total));
-                    } else if (counter == 0) { // 若为P2，发送给P1
+                    } else if (counter == 1) { // 若为P2，发送给P1
                         ips.add(calculators.get(0));
                     } else if (counter == total - 1) { // 若为Pn，发送给P2
                         ips.add(calculators.get(1));
@@ -44,6 +44,7 @@ public class Worker implements Runnable {
                         Sender sender = new Sender(Sender.Type.CALCULATOR, calculators.get(id));
                         Data data = new Data(0, sender, Data.Type.SWAP, d);
                         HttpUtils.httpPostRequest("http://" + ip, JSON.toJSONString(data));
+                        System.out.println("SEND: " + data);
                     }
                 }
                 // 当有别的节点的数据到达，且自己已经算出[d]_i
@@ -55,19 +56,19 @@ public class Worker implements Runnable {
                     if (id == 0) { // P1计算
                         dividend = fieldOperator.sub(swapD, fieldOperator.mul(fieldOperator.alpha(), d));
                         divisor = fieldOperator.sub(BigInteger.ONE, fieldOperator.alpha());
-                    } else if (counter == 0) { // P2计算
+                    } else if (counter == 1) { // P2计算
                         dividend = fieldOperator.sub(swapD, fieldOperator.mul(fieldOperator.exp(fieldOperator.alpha(), BigInteger.valueOf(total - 2)), d));
                         divisor = fieldOperator.sub(BigInteger.ONE, fieldOperator.exp(fieldOperator.alpha(), BigInteger.valueOf(total - 2)));
                     } else { // Pi计算
-                        dividend = fieldOperator.sub(swapD, fieldOperator.mul(fieldOperator.exp(fieldOperator.alpha(), BigInteger.valueOf(counter)), d));
+                        dividend = fieldOperator.sub(d, fieldOperator.mul(fieldOperator.exp(fieldOperator.alpha(), BigInteger.valueOf(counter)), swapD));
                         divisor = fieldOperator.sub(BigInteger.ONE, fieldOperator.exp(fieldOperator.alpha(), BigInteger.valueOf(counter)));
                     }
 
                     result = fieldOperator.div(dividend, divisor);
 
                     if (id > 0) { // P1 不更新
-                        if (counter == 0) { // P2 -> Pn
-                            counter = total - 2;
+                        if (counter == 1) { // P2 -> Pn
+                            counter = total - 1;
                         } else { // Pi -> Pi-1
                             counter--;
                         }
