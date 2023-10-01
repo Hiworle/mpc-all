@@ -22,5 +22,5 @@ public class Data {
     private Integer seqNum;
     private Sender sender;
     private Type type;
-    private BigInteger content;
+    private BigInteger[] content;
 }

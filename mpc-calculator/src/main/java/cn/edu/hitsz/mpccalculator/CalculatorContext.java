@@ -11,8 +11,8 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 public class CalculatorContext {
 
-    public static final BlockingDeque<BigInteger> inputQueue = new LinkedBlockingDeque<>();
-    public static final BlockingDeque<BigInteger> swapQueue = new LinkedBlockingDeque<>();
+    public static final BlockingDeque<BigInteger[]> inputQueue = new LinkedBlockingDeque<>();
+    public static final BlockingDeque<BigInteger[]> swapQueue = new LinkedBlockingDeque<>();
     public static volatile Integer id;
     public static volatile Integer total;
     public static volatile List<String> calculators;

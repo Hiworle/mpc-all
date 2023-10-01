@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
+
 /**
  * @author hope
  * @date 2023/9/9 - 10:33
@@ -50,6 +52,6 @@ public class CalculatorController {
         if (worker.getResult() == null) {
             return "NULL";
         }
-        return worker.getResult().toString();
+        return Arrays.toString(worker.getResult());
     }
 }

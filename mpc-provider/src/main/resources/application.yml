@@ -7,7 +7,7 @@ mpc:
   id: 0
   providers: 127.0.0.1:9090,127.0.0.1:9091
   field:
-    alpha: 22
-    k: 206158430209
+    alpha: 2
+    k: 13
 server:
   port: 8090

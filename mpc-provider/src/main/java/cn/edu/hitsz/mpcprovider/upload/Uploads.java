@@ -25,9 +25,9 @@ public class Uploads {
         BigInteger[][] ans = CalcAns(numbers);
         try {
             for (int i = 0; i < ProviderContext.total; i++) {
-                BigInteger num = ans[i][0];
+                BigInteger[] vector = ans[i];
                 String ip = ProviderContext.providers.get(ProviderContext.id); //这里用的是id，0号id就是第一个（A），1号就是第二个（B)
-                Data data = new Data(100, new Sender(Sender.Type.PROVIDER, ip), Data.Type.INPUT, num);
+                Data data = new Data(100, new Sender(Sender.Type.PROVIDER, ip), Data.Type.INPUT, vector);
 
                 String result = HttpUtils.httpPostRequest("http://" + ProviderContext.calculators.get(i), JSON.toJSONString(data));
                 System.out.println(result);
@@ -42,9 +42,15 @@ public class Uploads {
 
     //初始分离，计算需要传给每个calculator的数据
     private static BigInteger[][] CalcAns(BigInteger[] numbers) {
-        BigInteger[][] a = new BigInteger[2][1];
-        a[0][0] = numbers[0];
-        a[1][0] = numbers[1];
+        BigInteger[][] a = new BigInteger[2][numbers.length / 2];
+//        a[0][0] = numbers[0];
+//        a[1][0] = numbers[1];
+        int cnt = 0;
+        for (int j = 0; j < a[0].length; j++) {
+            for (int i = 0; i < 2; i++) {
+                a[i][j] = numbers[cnt++];
+            }
+        }
 
         CalcG();
 

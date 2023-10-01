@@ -18,9 +18,9 @@ import static cn.edu.hitsz.mpccalculator.CalculatorContext.*;
  */
 public class Worker implements Runnable {
 
-    private int counter = id;
-    private BigInteger d = null;
-    private BigInteger result = null;
+    private final int counter = id;
+    private BigInteger[] d = null;
+    private BigInteger[] result = null;
     private final FieldOperator fieldOperator = new FieldOperator(k, alpha);
 
     @Override
@@ -29,8 +29,8 @@ public class Worker implements Runnable {
             try {
                 // 计算[d]_i = [a]_i * [b]_i, i是 counter
                 if (!inputQueue.isEmpty()) {
-                    BigInteger a = inputQueue.take();
-                    BigInteger b = inputQueue.take();
+                    BigInteger[] a = inputQueue.take();
+                    BigInteger[] b = inputQueue.take();
                     d = fieldOperator.mul(a, b);
                     List<String> ips = new ArrayList<>();
                     if (id == 0) { // 若为P1，发送给P3-Pn
@@ -50,8 +50,8 @@ public class Worker implements Runnable {
                 // 当有别的节点的数据到达，且自己已经算出[d]_i
                 if (!swapQueue.isEmpty() && d != null) {
                     BigInteger divisor;
-                    BigInteger dividend;
-                    BigInteger swapD = swapQueue.take();
+                    BigInteger[] dividend;
+                    BigInteger[] swapD = swapQueue.take();
 
                     if (id == 0) { // P1计算
                         dividend = fieldOperator.sub(swapD, fieldOperator.mul(fieldOperator.alpha(), d));
@@ -66,13 +66,13 @@ public class Worker implements Runnable {
 
                     result = fieldOperator.div(dividend, divisor);
 
-                    if (id > 0) { // P1 不更新
-                        if (counter == 1) { // P2 -> Pn
-                            counter = total - 1;
-                        } else { // Pi -> Pi-1
-                            counter--;
-                        }
-                    }
+//                    if (id > 0) { // P1 不更新
+//                        if (counter == 1) { // P2 -> Pn
+//                            counter = total - 1;
+//                        } else { // Pi -> Pi-1
+//                            counter--;
+//                        }
+//                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -81,7 +81,7 @@ public class Worker implements Runnable {
         }
     }
 
-    public BigInteger getResult() {
+    public BigInteger[] getResult() {
         return result;
     }
 

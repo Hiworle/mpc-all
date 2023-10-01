@@ -18,7 +18,10 @@ class MpcCalculatorApplicationTests {
 
     @Test
     void testHttp() {
-        Data data = new Data(100, new Sender(Sender.Type.PROVIDER, "192.168.0.1"), Data.Type.INPUT, BigInteger.ONE);
+        BigInteger[] content = new BigInteger[1];
+        content[0] = BigInteger.ONE;
+        Data data = new Data(100, new Sender(Sender.Type.PROVIDER, "192.168.0.1"),
+                Data.Type.INPUT, content);
         // 发送并接收请求
         String result = HttpUtils.httpPostRequest("http://127.0.0.1:8080", JSON.toJSONString(data));
         System.out.println(result);
