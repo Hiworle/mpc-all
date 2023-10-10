@@ -9,6 +9,8 @@ import org.springframework.shell.standard.ShellOption;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 import static cn.edu.hitsz.mpcprovider.ProviderContext.*;
 
@@ -19,9 +21,82 @@ import static cn.edu.hitsz.mpcprovider.ProviderContext.*;
 @ShellComponent
 public class Commands {
 
+    private BigInteger[][] matrixA;
+    private BigInteger[][] matrixB;
+    private final FieldOperator op = new FieldOperator(k, alpha);
+
+
     @ShellMethod(value = "Echo input.", key = {"echo", "ec"})
     public void echo(String input) {
         System.out.println(input);
+    }
+
+    @ShellMethod(value = "Provide a matrix.", key = "matrix")
+    public void matrix(int m, int n, @ShellOption(arity = 100) BigInteger[] numbers) {
+        if (numbers.length != m * n) throw new RuntimeException("输入有误！");
+        BigInteger[][] matrix = new BigInteger[m][n];
+        int idx = 0;
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[i].length; j++) {
+                matrix[i][j] = numbers[idx++];
+            }
+        }
+        if (matrixA == null) {
+            matrixA = matrix;
+        } else {
+            matrixB = matrix;
+        }
+    }
+
+    @ShellMethod(value = "Combine two matrix.", key = "mcomb")
+    public void mcomb(int i, int j) {
+        BigInteger[] randomA = getRandomArray(matrixA.length);
+        BigInteger[] randomB = getRandomArray(matrixB[0].length);
+        boolean flag = matrixA[0].length % 2 == 1;
+        if (matrixA[0].length != matrixB.length) {
+            System.out.println("矩阵无法相乘！");
+            return;
+        } else if (flag) {
+            BigInteger[][] matrix = new BigInteger[matrixA.length][matrixA[0].length + 1];
+            for (int m = 0; m < matrix.length; m++) {
+                if (matrix[m].length - 1 >= 0)
+                    System.arraycopy(matrixA[m], 0, matrix[m], 0, matrix[m].length - 1);
+                matrix[m][matrix[0].length - 1] = randomA[m];
+            }
+            matrixA = matrix;
+            matrix = new BigInteger[matrixB.length + 1][matrixB[0].length];
+            for (int m = 0; m < matrix.length - 1; m++) {
+                System.arraycopy(matrixB[m], 0, matrix[m], 0, matrix[m].length);
+            }
+            matrix[matrix.length - 1] = randomB;
+            matrixB = matrix;
+        }
+
+        matrixB = transpose(matrixB);
+        BigInteger[][] result = new BigInteger[matrixA.length][matrixB.length];
+        for (int m = 0; m < matrixA.length; m++) {
+            for (int n = 0; n < matrixB.length; n++) {
+                Uploads.uploads(matrixA[m]);
+                Uploads.uploads(matrixB[n]);
+
+                BigInteger sum = combine(i, j);
+                if (flag) {
+                    sum = op.sub(sum, op.mul(randomA[m], randomB[n]));
+                }
+                result[m][n] = sum;
+            }
+        }
+
+        System.out.println("=================== MATRIX ===================");
+        for (BigInteger[] line : result) {
+            for (BigInteger bigInteger : line) {
+                System.out.printf("%10s", bigInteger);
+            }
+            System.out.println();
+        }
+
+        matrixA = null;
+        matrixB = null;
     }
 
     @ShellMethod(value = "Provide a vector.", key = {"provide"})
@@ -65,10 +140,10 @@ public class Commands {
     }
 
     @ShellMethod(value = "Combine the numbers.", key = "combine")
-    public void combine(int i, int j) {
+    public BigInteger combine(int i, int j) {
+        System.out.println("++++++++++++++++++++++++++++++++++++ COMBINE LOG ++++++++++++++++++++++++++++++++++++");
         if (i == j) {
-            System.out.println("i, j 不应相同！");
-            return;
+            throw new RuntimeException("i, j 不应相同！");
         }
         if (i < j) {
             int t = i;
@@ -78,16 +153,17 @@ public class Commands {
         String ipI = getIp(i);
         String ipJ = getIp(j);
 
-        String resultI = HttpUtils.httpPostRequest("http://" + ipI + "/result");
-        String resultJ = HttpUtils.httpPostRequest("http://" + ipJ + "/result");
+        String resultI;
+        while ("NULL".equals(resultI = HttpUtils.httpPostRequest("http://" + ipI + "/result"))) ;
+        String resultJ;
+        while ("NULL".equals(resultJ = HttpUtils.httpPostRequest("http://" + ipJ + "/result"))) ;
+
         BigInteger[] si = parseResult(resultI);
         BigInteger[] sj = parseResult(resultJ);
 
         System.out.println("\n===================== S =====================");
         System.out.println("s[" + j + "] = " + Arrays.toString(sj));
         System.out.println("s[" + i + "] = " + Arrays.toString(si));
-
-        FieldOperator op = new FieldOperator(k, alpha);
 
         BigInteger[] a1b1 = op.div(
                 op.sub(si, op.mul(op.exp(alpha, op.sub(BigInteger.valueOf(i), BigInteger.valueOf(j))), sj)),
@@ -105,6 +181,14 @@ public class Commands {
             ans[2 * k + 1] = a2b2[k];
         }
         System.out.println(Arrays.toString(ans));
+
+        BigInteger sum = BigInteger.ZERO;
+        for (BigInteger an : ans) {
+            sum = op.add(sum, an);
+        }
+        System.out.println("=================== SUM ===================");
+        System.out.println(sum);
+        return sum;
     }
 
     /**
@@ -140,5 +224,25 @@ public class Commands {
             ans[i] = new BigInteger(split[i].trim());
         }
         return ans;
+    }
+
+
+    private BigInteger[] getRandomArray(int n) {
+        Random r = new Random();
+        BigInteger[] arr = new BigInteger[n];
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = BigInteger.valueOf(r.nextInt()).mod(k);
+        }
+        return arr;
+    }
+
+    private BigInteger[][] transpose(BigInteger[][] matrix) {
+        BigInteger[][] m2 = new BigInteger[matrix[0].length][matrix.length];
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[i].length; j++) {
+                m2[j][i] = matrix[i][j];
+            }
+        }
+        return m2;
     }
 }

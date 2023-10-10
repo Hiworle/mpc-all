@@ -85,4 +85,11 @@ public class Worker implements Runnable {
         return result;
     }
 
+
+    public BigInteger[] clearResult() {
+        BigInteger[] ans = result;
+        result = null;
+        return ans;
+    }
+
 }

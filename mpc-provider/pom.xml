@@ -36,6 +36,14 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!--Thymeleaf启动器-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+            <version>2.7.11</version>
+        </dependency>
+
     </dependencies>
     <dependencyManagement>
         <dependencies>

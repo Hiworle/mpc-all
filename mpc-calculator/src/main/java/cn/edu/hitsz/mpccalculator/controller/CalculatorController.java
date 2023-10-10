@@ -52,6 +52,6 @@ public class CalculatorController {
         if (worker.getResult() == null) {
             return "NULL";
         }
-        return Arrays.toString(worker.getResult());
+        return Arrays.toString(worker.clearResult());
     }
 }

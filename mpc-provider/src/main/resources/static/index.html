@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>输入矩阵</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+<h1>输入矩阵</h1>
+<form id="matrixForm">
+    <label for="rows">行数：</label>
+    <input type="number" name="rows" id="rows" required><br>
+
+    <label for="columns">列数：</label>
+    <input type="number" name="columns" id="columns" required><br>
+
+    <h3>请输入矩阵元素：</h3>
+    <table id="matrixTable">
+
+    </table>
+
+    <br>
+    <input type="button" value="提交" onclick="submitMatrix()">
+</form>
+
+<script>
+    function submitMatrix() {
+        var rows = document.getElementById("rows").value;
+        var columns = document.getElementById("columns").value;
+
+        var table = document.getElementById("matrixTable");
+        table.innerHTML = ""; // 清空之前的内容
+
+        for (var i = 0; i < rows; i++) {
+            var row = document.createElement("tr");
+
+            for (var j = 0; j < columns; j++) {
+                var cell = document.createElement("td");
+                var input = document.createElement("input");
+                input.type = "number";
+                input.name = "matrix[" + i + "][" + j + "]";
+                input.required = true;
+
+                cell.appendChild(input);
+                row.appendChild(cell);
+            }
+
+            table.appendChild(row);
+        }
+
+        var form = document.getElementById("matrixForm");
+        var formData = new FormData(form);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "http://127.0.0.1:8090/matrix", true);  // 注意：这里是示例，直接发送至百度域名会受到跨域限制
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                alert("提交成功！");
+            }
+        };
+        xhr.send(formData);
+    }
+</script>
+</body>
+</html>
